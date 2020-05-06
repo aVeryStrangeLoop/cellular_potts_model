@@ -3,7 +3,6 @@
 
 from config import cConfig
 from simulated_annealing import SimulatedAnneal
-from genetic_algorithm import GeneticAlgo
 import sys
 import datetime 
 import numpy as np
@@ -18,32 +17,17 @@ def main(args):
     
     InitSys = conf.InitConfig()
 
-    if "SA" in conf.METHODS:
-        ############################### RUN Simulated Annealing
-        # Inputs:
-        # 1. Initial State of the system
-        # 2. Mutator that gives a random neighbor in the surrounding
-        # 3. Hamiltonian to minimize
-        # 4. Output file where the algorithm writes results
-        ###############################
-        #pass
-        SimulatedAnneal(InitSys,conf.SAMutator,conf.H,ofile)
+    ############################### RUN Simulated Annealing
+    # Inputs:
+    # 1. Initial State of the system
+    # 2. Mutator that gives a random neighbor in the surrounding
+    # 3. Hamiltonian to minimize
+    # 4. Output file where the algorithm writes results
+    ###############################
+    
+    SimulatedAnneal(InitSys,conf.SAMutator,conf.H,ofile)
 
 
-    if "GA" in conf.METHODS:
-        ############################### RUN Genetic Algorithm
-        # Inputs:
-        # 1. Initial State of the system
-        # 2. Mutator that gives a random neighbor in the surrounding
-        # 3. Crossover function used to crossover two parent arrays
-        # 4. Hamiltonian to minimize
-        # 5. Output file where the algorithm writes results
-        ###############################
-        #pass
-        GeneticAlgo(InitSys,conf.GAMutator,conf.GACrossover,conf.H,ofile)
-
-    # Close output file
-    ofile.close()
 
 
 ################################## ACCESORY FUNCTIONS

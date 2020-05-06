@@ -14,19 +14,15 @@ class cConfig:
     STATES = np.array([0,1]) 
     # State number conserved?
     # If this is set to true, both GA and SA ensure that the total number of each state is conserved during the run
-    CONSERVED = False
+    CONSERVED = True
 
     # Set this to true to get a verbose output
     DEBUG_MODE = True
 
     # Define world dimensions
     # Number of cells in both X and Y directions
-    WORLD_X = 20
-    WORLD_Y = 20
-
-    # Define the methods to use for optimization.
-    # SA = Simulated Annealing, GA = Genetic Algorithm
-    METHODS = ["SA"] 
+    WORLD_X = 50
+    WORLD_Y = 50
 
     # Define hamiltonian
     ## NOTE : You might have to write accessory functions if you want to implement complex hamiltonians. For eg - period boundaries will require functions to calculate interactions across boundaries.
@@ -35,8 +31,54 @@ class cConfig:
         # Write your own code here to output the hamiltonian given a system configuration
         if self.DEBUG_MODE:
             print "Calculating hamiltonian"
-        h = np.sum(Z)
-        return h
+        
+        # Hamiltonian = summation (1 - delta(i,j,i',j'))
+        h = 0.0
+
+        X = Z.shape[0]
+        Y = Z.shape[1]
+
+        for i in range(X):
+            for j in range(Y):
+                h_ij = 1.0
+                self_state = Z[i,j]
+                #left neighbor
+                if i-1>=0:
+                    left_state = Z[i-1,j]
+                else:
+                    left_state = Z[X-1,j]
+                if self_state == left_state:
+                    h_ij -= 1.0
+		
+
+                # right neighbor
+                if i+1<=X-1:
+                    right_state = Z[i+1,j]
+                else:
+                    right_state = Z[0,j]
+                if self_state == right_state:
+                    h_ij -= 1.0
+
+                # bottom neighbor
+                if j-1>=0:
+                    bot_state = Z[i,j-1]
+                else:
+                    bot_state = Z[i,Y-1]
+                if self_state == bot_state:
+                    h_ij -= 1.0
+
+                # top neighbor
+                if j+1<=Y-1:
+                    top_state = Z[i,j+1]
+                else:
+                    top_state = Z[i,0]    
+                if self_state == top_state:
+                    h_ij -= 1.0
+             
+                h += h_ij
+                
+
+        return h/2. # Compensate for double counting
     
     def StateMutator(self,cur_state):
         # Defines how a cell's state is mutated
@@ -90,42 +132,11 @@ class cConfig:
                         print "Conserved state mode ON, exchanging states %d and %d at (%d,%d) and (%d,%d) resp." % (state_1,state_2,i1,j1,i2,j2)
                     return mut
             
-    
-    def GAMutator(self,Z):
-        # Mutates a state with mutation frequency freq for Genetic Algorithm
-        FREQ = 0.2 ### TRY CHANGING THIS FOR BETTER RESULTS
-        # Create a mask to randomly mutate array elements
-        mask = np.random.choice([True,False],Z.shape,p=[FREQ,1-FREQ])
-        r = np.random.choice(self.STATES,Z.shape)
-        mut = Z
-        mut[mask]=r[mask]
-        return mut
-
-    def GACrossover(self,State1,State2):
-        # Recombines two states for Genetic algorithm
-        state1_flat = State1.flatten()
-        state2_flat = State2.flatten()
-
-        if State1.shape!=State2.shape:
-            print("Error : In GARecombine, system state shapes not equal!")
-            exit(1)
-        
-        nCROSSOVER = 10 #No. of crossovers
-
-        ## CROSSOVER ALGORITHM
-        ## 1. Determine indexes of nCROSSOVER points
-        idx_crossover = np.random.choice(len(state1_flat),nCROSSOVER,replace=False)
-        
-        for idx in idx_crossover:
-            tmp = state2_flat[:idx].copy()
-            state2_flat[:idx], state1_flat[:idx]  = state1_flat[:idx], tmp
-        
-        return np.reshape(state1_flat,State1.shape),np.reshape(state2_flat,State2.shape)
 
     def InitConfig(self):
         # Sets the initial configuration of the system
         # For now it is chosen randomly from given states, change this function to change the initial config
-        init = np.random.choice([1],(self.WORLD_X,self.WORLD_Y))
+        init = np.random.choice(self.STATES,(self.WORLD_X,self.WORLD_Y))
         if self.DEBUG_MODE:
             print "Initialised configuration,"
             print init
@@ -137,3 +148,7 @@ class cConfig:
         check = np.isin(Z,self.STATES)
         return np.all(check)
 
+#conf = cConfig()
+#test = np.zeros((2,2))
+#print test
+#print conf.H(test)

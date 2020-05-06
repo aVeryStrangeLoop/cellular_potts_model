@@ -4,14 +4,14 @@ import random
 
 def Cooling(time):
     T_init = 10.
-    tau = 1000000.
+    tau = 100000.
     return T_init*np.exp(-time/tau)
 	
 def SimulatedAnneal(InitSys,Mutator,H,ofile):
     
     SAheader(ofile)
 
-    STEPS = 100000000
+    STEPS = 10000000
 
 	
     optState = InitSys # Stores the most optimal state ever encountered
