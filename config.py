@@ -27,12 +27,12 @@ class cConfig:
 
     MODE = 0 # Monte-carlo mode (0 = Constant temperature, 1 = cooling)
 
-    steps = 1000 # Total number of steps for monte_carlo(mode=0)/simulated annealing(mode=1)
+    steps = 1000000 # Total number of steps for monte_carlo(mode=0)/simulated annealing(mode=1)
 
-    save_every = 10 # Save system state every <save_every> steps
+    save_every = 100 # Save system state every <save_every> steps
 
     ## Monte-Carlo temperature (if mode==0)
-    temp_constant = 20.
+    temp_constant = 1.0
     
     ## Cooling properties (if mode ==1)
     temp_init = 1E20 # Initial temperature (Only applicable if mode==1)
