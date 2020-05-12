@@ -5,29 +5,35 @@
 import copy
 import numpy as np
 import random
-## This class contains the main elements that can be accessed by the main program during runtime
+
 
 class cConfig:
-    # Define accesible states
+    ### Configuration class contains all user-define parameters required during runtime  
+    ### Change the following parameters as per liking
     
-    # Can be a array of any python numerical type that can be used further for calculating hamiltonian using user-defined function
-    STATES = np.array([0,1]) 
-    # State number conserved?
-    # If this is set to true, both GA and SA ensure that the total number of each state is conserved during the run
-    CONSERVED = True
+    STATES = np.array([0,1]) # Possible states of the system, given as a numpy array, each state type has an idx 
+    
+    CONSERVED = True # If this is set to true, the mutator ensures that the total number of each state is conserved during the run
 
-    # Set this to true to get a verbose output
-    DEBUG_MODE = True
+    DEBUG_MODE = False # Set to True to get a verbose output
 
-    # Define world dimensions
-    # Number of cells in both X and Y directions
-    WORLD_X = 50
-    WORLD_Y = 50
+    WORLD_X = 50 # Cells in X direction
+    WORLD_Y = 50 # Cells in y direction
 
-    # Define hamiltonian
-    ## NOTE : You might have to write accessory functions if you want to implement complex hamiltonians. For eg - period boundaries will require functions to calculate interactions across boundaries.
+    MODE = 0 # Monte-carlo mode (0 = Constant temperature, 1 = cooling)
+
+    ## Monte-Carlo temperature (if mode==0)
+    temp_constant = 20.
+
+    ## Cooling properties (if mode ==1)
+    temp_init = 1E20 # Initial temperature (Only applicable if mode==1)
+    temp_final = 1E-20 # Final temperature (Only applicable if mode==1)
+    cooling_steps = 100000 # Steps from initial temperature to final temperature (only applicable if mode==1)   
+
     def H(self,Z):
+        # Hamiltonian calculation for a given grid Z
         # Z is a numpy array
+
         # Write your own code here to output the hamiltonian given a system configuration
         if self.DEBUG_MODE:
             print "Calculating hamiltonian"
@@ -94,7 +100,7 @@ class cConfig:
         return new_state
         
 
-    def SAMutator(self,Z):
+    def Mutator(self,Z):
         ## If conserved status is false, mutate only one cell
         if not self.CONSERVED:
             # Give the system state derived after a monte-carlo step from Z
@@ -133,7 +139,7 @@ class cConfig:
                     return mut
             
 
-    def InitConfig(self):
+    def InitSys(self):
         # Sets the initial configuration of the system
         # For now it is chosen randomly from given states, change this function to change the initial config
         init = np.random.choice(self.STATES,(self.WORLD_X,self.WORLD_Y))
@@ -148,7 +154,3 @@ class cConfig:
         check = np.isin(Z,self.STATES)
         return np.all(check)
 
-#conf = cConfig()
-#test = np.zeros((2,2))
-#print test
-#print conf.H(test)

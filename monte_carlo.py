@@ -1,15 +1,12 @@
-# Simulated Annealing subroutine for multistate-ising solver
+# Constant temperature monte carlo subroutine for multistate-ising solver
 import numpy as np
 import random
 import math
 
-def Cooling(temp_init,temp_fin,steps,time): # time == Monte carlo step number
-    tau = float(steps)/math.log(temp_init/temp_fin)
-    return temp_init * math.exp(-float(time)/tau)
 	
-def SimulatedAnneal(conf,ofile):
+def MonteCarlo(conf,ofile):
     
-    SAheader(ofile) # Write header for summary file
+    MCheader(ofile) # Write header for summary file
 
     InitState = conf.InitSys() # Initialize a state using function specified in config
 
@@ -23,9 +20,9 @@ def SimulatedAnneal(conf,ofile):
 
     while conf.cooling_steps > cur_step:
 		
-        T_cur = Cooling(conf.temp_init,conf.temp_final,conf.cooling_steps,cur_step) 
+        T_cur = conf.temp_constant
 
-        PrintAnnealState(ofile,cur_step,T_cur,curEnergy,optEnergy)
+        PrintState(ofile,cur_step,T_cur,curEnergy,optEnergy)
         print(cur_step,T_cur,curEnergy,optEnergy)
 
         accepted = False
@@ -46,7 +43,7 @@ def SimulatedAnneal(conf,ofile):
 
         cur_step += 1
 
-    ofile.write("# END OF SIMULATED ANNEALING")
+    ofile.write("# END OF Monte Carlo simulation")
     np.savetxt("optimal_state.csv",optState)
 
 def ToAccept(E_cur,E_new,T): # Acceptance probability
@@ -61,10 +58,10 @@ def ToAccept(E_cur,E_new,T): # Acceptance probability
             return False
 
 
-def SAheader(ofile):
-    ofile.write("## RUNNING SIMULATED ANNEALING MODULE##\n")
+def MCheader(ofile):
+    ofile.write("## RUNNING MONTE_CARLO MODULE##\n")
     ofile.write("# Written by Bhaskar Kumawat (@aVeryStrangeLoop)\n")
     ofile.write("cur_step,T,cur_energy,opt_energy\n")
 
-def PrintAnnealState(ofile,step,T,cur_energy,opt_energy):
+def PrintState(ofile,step,T,cur_energy,opt_energy):
     ofile.write("%d,%f,%f,%f\n" % (step,T,cur_energy,opt_energy))

@@ -3,6 +3,7 @@
 
 from config import cConfig
 from simulated_annealing import SimulatedAnneal
+from monte_carlo import MonteCarlo
 import sys
 import datetime 
 import numpy as np
@@ -14,18 +15,11 @@ def main(args):
     # Start an output file where all the results will be stored
     ofile = open("results.csv","w+")
     WriteHeader(ofile,conf)
-    
-    InitSys = conf.InitConfig()
 
-    ############################### RUN Simulated Annealing
-    # Inputs:
-    # 1. Initial State of the system
-    # 2. Mutator that gives a random neighbor in the surrounding
-    # 3. Hamiltonian to minimize
-    # 4. Output file where the algorithm writes results
-    ###############################
-    
-    SimulatedAnneal(InitSys,conf.SAMutator,conf.H,ofile)
+    if conf.MODE == 0:
+        MonteCarlo(conf,ofile)
+    elif conf.MODE == 1: 
+        SimulatedAnneal(conf,ofile)
 
 
 
