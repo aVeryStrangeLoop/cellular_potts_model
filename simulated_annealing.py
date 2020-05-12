@@ -21,12 +21,15 @@ def SimulatedAnneal(conf,ofile):
 	
     cur_step = 0
 
-    while conf.cooling_steps > cur_step:
+    while conf.steps >= cur_step:
 		
-        T_cur = Cooling(conf.temp_init,conf.temp_final,conf.cooling_steps,cur_step) 
+        T_cur = Cooling(conf.temp_init,conf.temp_final,conf.steps,cur_step) 
 
         PrintAnnealState(ofile,cur_step,T_cur,curEnergy,optEnergy)
         print(cur_step,T_cur,curEnergy,optEnergy)
+
+        if cur_step%conf.save_every == 0 or cur_step==conf.steps:
+            np.savetxt("results/mcs_"+str(cur_step)+".csv",curState)
 
         accepted = False
         
@@ -46,8 +49,7 @@ def SimulatedAnneal(conf,ofile):
 
         cur_step += 1
 
-    ofile.write("# END OF SIMULATED ANNEALING")
-    np.savetxt("optimal_state.csv",optState)
+    np.savetxt("results/final_optimal_state.csv",optState)
 
 def ToAccept(E_cur,E_new,T): # Acceptance probability
     if E_new < E_cur:
@@ -62,7 +64,7 @@ def ToAccept(E_cur,E_new,T): # Acceptance probability
 
 
 def SAheader(ofile):
-    ofile.write("## RUNNING SIMULATED ANNEALING MODULE##\n")
+    ofile.write("# RUNNING SIMULATED ANNEALING MODULE##\n")
     ofile.write("# Written by Bhaskar Kumawat (@aVeryStrangeLoop)\n")
     ofile.write("cur_step,T,cur_energy,opt_energy\n")
 

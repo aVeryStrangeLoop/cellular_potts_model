@@ -10,10 +10,15 @@ import random
 class cConfig:
     ### Configuration class contains all user-define parameters required during runtime  
     ### Change the following parameters as per liking
-    
+     
     STATES = np.array([0,1]) # Possible states of the system, given as a numpy array, each state type has an idx 
     
     CONSERVED = True # If this is set to true, the mutator ensures that the total number of each state is conserved during the run
+    EXCHANGE_MODE = 0 # If Conserved is true, cells can be exchanged in three ways // TODO, modes 1 and 2 not implemented yet
+    # Global exchange : mode= 0 
+    # Four nearest neighbor exchange : mode = 1
+    # Eight nearest neighbor exchange : mode = 2 
+
 
     DEBUG_MODE = False # Set to True to get a verbose output
 
@@ -22,13 +27,16 @@ class cConfig:
 
     MODE = 0 # Monte-carlo mode (0 = Constant temperature, 1 = cooling)
 
+    steps = 1000 # Total number of steps for monte_carlo(mode=0)/simulated annealing(mode=1)
+
+    save_every = 10 # Save system state every <save_every> steps
+
     ## Monte-Carlo temperature (if mode==0)
     temp_constant = 20.
-
+    
     ## Cooling properties (if mode ==1)
     temp_init = 1E20 # Initial temperature (Only applicable if mode==1)
     temp_final = 1E-20 # Final temperature (Only applicable if mode==1)
-    cooling_steps = 100000 # Steps from initial temperature to final temperature (only applicable if mode==1)   
 
     def H(self,Z):
         # Hamiltonian calculation for a given grid Z

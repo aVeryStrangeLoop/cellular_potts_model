@@ -18,13 +18,16 @@ def MonteCarlo(conf,ofile):
 	
     cur_step = 0
 
-    while conf.cooling_steps > cur_step:
+    while conf.steps >= cur_step:
 		
         T_cur = conf.temp_constant
 
         PrintState(ofile,cur_step,T_cur,curEnergy,optEnergy)
         print(cur_step,T_cur,curEnergy,optEnergy)
 
+        if cur_step%conf.save_every == 0 or cur_step==conf.steps:
+            np.savetxt("results/mcs_"+str(cur_step)+".csv",curState)
+        
         accepted = False
         
         neighborState = conf.Mutator(curState)
@@ -43,8 +46,7 @@ def MonteCarlo(conf,ofile):
 
         cur_step += 1
 
-    ofile.write("# END OF Monte Carlo simulation")
-    np.savetxt("optimal_state.csv",optState)
+    np.savetxt("results/final_optimal_state.csv",optState)
 
 def ToAccept(E_cur,E_new,T): # Acceptance probability
     if E_new < E_cur:
@@ -59,7 +61,7 @@ def ToAccept(E_cur,E_new,T): # Acceptance probability
 
 
 def MCheader(ofile):
-    ofile.write("## RUNNING MONTE_CARLO MODULE##\n")
+    ofile.write("# RUNNING MONTE_CARLO MODULE##\n")
     ofile.write("# Written by Bhaskar Kumawat (@aVeryStrangeLoop)\n")
     ofile.write("cur_step,T,cur_energy,opt_energy\n")
 
