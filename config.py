@@ -22,10 +22,10 @@ class cConfig:
 
     DEBUG_MODE = False # Set to True to get a verbose output
 
-    WORLD_X = 50 # Cells in X direction
-    WORLD_Y = 50 # Cells in y direction
+    WORLD_X = 100 # Cells in X direction
+    WORLD_Y = 100 # Cells in y direction
 
-    MODE = 0 # Monte-carlo mode (0 = Constant temperature, 1 = cooling)
+    MODE = 1 # Monte-carlo mode (0 = Constant temperature, 1 = cooling)
 
     steps = 1000 # Total number of steps for monte_carlo(mode=0)/simulated annealing(mode=1)
 
@@ -35,8 +35,8 @@ class cConfig:
     temp_constant = 1.0
     
     ## Cooling properties (if mode ==1)
-    temp_init = 1E20 # Initial temperature (Only applicable if mode==1)
-    temp_final = 1E-20 # Final temperature (Only applicable if mode==1)
+    temp_init = 1000.0 # Initial temperature (Only applicable if mode==1)
+    temp_final = 0.1 # Final temperature (Only applicable if mode==1)
 
     def H(self,Z):
         # Hamiltonian calculation for a given grid Z
