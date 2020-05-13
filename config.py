@@ -14,7 +14,7 @@ class cConfig:
     STATES = np.array([0,1]) # Possible states of the system, given as a numpy array, each state type has an idx 
     
     CONSERVED = True # If this is set to true, the mutator ensures that the total number of each state is conserved during the run
-    EXCHANGE_MODE = 0 # If Conserved is true, cells can be exchanged in three ways // TODO, modes 1 and 2 not implemented yet
+    EXCHANGE_MODE = 2 # If Conserved is true, cells can be exchanged in three ways
     # Global exchange : mode= 0 
     # Four nearest neighbor exchange : mode = 1
     # Eight nearest neighbor exchange : mode = 2 
@@ -27,9 +27,9 @@ class cConfig:
 
     MODE = 0 # Monte-carlo mode (0 = Constant temperature, 1 = cooling)
 
-    steps = 1000000 # Total number of steps for monte_carlo(mode=0)/simulated annealing(mode=1)
+    steps = 1000 # Total number of steps for monte_carlo(mode=0)/simulated annealing(mode=1)
 
-    save_every = 100 # Save system state every <save_every> steps
+    save_every = 1 # Save system state every <save_every> steps
 
     ## Monte-Carlo temperature (if mode==0)
     temp_constant = 1.0
@@ -129,10 +129,39 @@ class cConfig:
             while not states_exchanged:             
                 i1 = random.randrange(0,Z.shape[0])
                 j1 = random.randrange(0,Z.shape[1])
-            
-                i2 = random.randrange(0,Z.shape[0])
-                j2 = random.randrange(0,Z.shape[1])
-                
+   				
+                if self.EXCHANGE_MODE==0: # Choose random cell         
+                    i2 = random.randrange(0,Z.shape[0])
+                    j2 = random.randrange(0,Z.shape[1])
+                elif self.EXCHANGE_MODE==1: # Choose out of four nearest neighbors
+                    direction = random.randrange(0,4)
+                    if direction == 0: # Top
+                        i2 = i1
+                        j2 = j1+1
+                        if j2>=Z.shape[1]:
+                            j2 = j1
+                    elif direction == 1: #Right
+                        i2 = i1+1
+                        j2 = j1
+                        if i2>=Z.shape[0]:
+                            i2 = i1
+                    elif direction == 2: #Bottom
+                        i2 = i1
+                        j2 = j1-1
+                        if j2<0:
+                            j2 = j1
+                    elif direction == 3: #Left
+                        i2 = i1-1
+                        j2 = j1
+                        if i2<0:
+                            i2 = i1
+                elif self.EXCHANGE_MODE==2: # Choose out of four nearest neighbors
+                    i2 = i1 + random.randrange(-1,2) # -1 to 1 
+                    j2 = j1 + random.randrange(-1,2) # -1 to 1
+                    if i2>=Z.shape[0] or i2<0 or j2>=Z.shape[1] or j2<0: 
+                        i2 = i1
+                        j2 = j1
+               
                 if not (Z[i1,j1]==Z[i2,j2]):
                     states_exchanged == True
                     state_1 = Z[i1,j1]
