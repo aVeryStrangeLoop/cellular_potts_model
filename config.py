@@ -5,16 +5,23 @@
 import copy
 import numpy as np
 import random
-
+import math
 
 class cConfig:
     ### Configuration class contains all user-define parameters required during runtime  
     ### Change the following parameters as per liking
      
-    STATES = np.array([0,1]) # Possible states of the system, given as a numpy array, each state type has an idx 
+    STATES = np.array([0,1,2]) # Possible states of the system, given as a numpy array, each state type has an idx 
+    ### Light = 0 , Dark = 1, Medium = 2    
+ 
+    CONSERVED = False # If this is set to true, the mutator ensures that the total number of each state is conserved during the run
     
-    CONSERVED = True # If this is set to true, the mutator ensures that the total number of each state is conserved during the run
-    EXCHANGE_MODE = 2 # If Conserved is true, cells can be exchanged in three ways
+    FLIP_MODE = 0 #If conserved is False, a cell can be flipped in three ways #TODO
+    # Global flip : mode = 0 - flip to any state
+    # Four nearest neighbor flip : mode = 1 - flip to state of one of the four neighbors
+    # Eight nearest neighbor flip : mode = 2 - flip to state of one of the eight neighbors     
+
+    EXCHANGE_MODE = 0 # If Conserved is true, cells can be exchanged in three ways
     # Global exchange : mode= 0 
     # Four nearest neighbor exchange : mode = 1
     # Eight nearest neighbor exchange : mode = 2 
@@ -22,17 +29,19 @@ class cConfig:
 
     DEBUG_MODE = False # Set to True to get a verbose output
 
-    WORLD_X = 100 # Cells in X direction
-    WORLD_Y = 100 # Cells in y direction
+    WORLD_X = 50 # Cells in X direction
+    WORLD_Y = 50 # Cells in y direction
 
-    MODE = 1 # Monte-carlo mode (0 = Constant temperature, 1 = cooling)
+    MODE = 0 # Monte-carlo mode (0 = Constant temperature, 1 = cooling)
 
-    steps = 1000 # Total number of steps for monte_carlo(mode=0)/simulated annealing(mode=1)
+    MAX_MCS = 400
 
-    save_every = 1 # Save system state every <save_every> steps
+    steps = MAX_MCS*16.*WORLD_X*WORLD_Y # Total number of steps for monte_carlo(mode=0)/simulated annealing(mode=1)
+
+    save_every = 10000 # Save system state every <save_every> steps
 
     ## Monte-Carlo temperature (if mode==0)
-    temp_constant = 1.0
+    temp_constant = 10.0
     
     ## Cooling properties (if mode ==1)
     temp_init = 1000.0 # Initial temperature (Only applicable if mode==1)
@@ -46,53 +55,95 @@ class cConfig:
         if self.DEBUG_MODE:
             print "Calculating hamiltonian"
         
+        # Parameters for glazier model
+        def J(s1,s2):
+            J00 = 14. # Surface energy between 0-0 (light-light)
+            J11 = 2. # Surface energy between 1-1 (dark-dark)
+            J22 = 0. # Surface energy between 2-2 (med-med)
+
+
+            J01 = 11. # Surface energy between 0-1 (light-dark)
+        
+            J12 = 16. # Surface energy between 1-2 (dark-medium)
+            J02 = 16. # Surface energy between 0-2 (light-medium)
+            
+            if (s1==0 and s2==0):
+                return J00
+            elif (s1==1 and s2==1):
+                return J11
+            elif (s1==2 and s2==2):
+                return J22
+            elif (s1==0 and s2==1) or (s1==1 and s2==0):
+                return J01
+            elif (s1==1 and s2==2) or (s1==2 and s2==1):
+                return J12
+            elif (s1==0 and s2==2) or (s1==2 and s2==0):
+                return J02
+
+        lambda_area = 1. # Strength of area constraint
+
+        target_areas = [100.,100.,-1] # Target area for the three cell types (light,dark,med)
+
+        def theta(target_area):
+            if target_area > 0:
+                return 1.
+            elif target_area < 0 :
+                return 0.
         # Hamiltonian = summation (1 - delta(i,j,i',j'))
         h = 0.0
 
         X = Z.shape[0]
         Y = Z.shape[1]
 
+        areas = [0.,0.,0.] #light,dark,medium
+
+        # Add interaction energies (and count area of each state)
         for i in range(X):
             for j in range(Y):
-                h_ij = 1.0
-                self_state = Z[i,j]
+                self_state = Z[i,j] # Get i,j's state 
+                areas[self_state]+=1 # add to total area of this state
+                neighbor_states = []
                 #left neighbor
                 if i-1>=0:
                     left_state = Z[i-1,j]
                 else:
                     left_state = Z[X-1,j]
-                if self_state == left_state:
-                    h_ij -= 1.0
-		
+                neighbor_states.append(left_state)
 
                 # right neighbor
                 if i+1<=X-1:
                     right_state = Z[i+1,j]
                 else:
                     right_state = Z[0,j]
-                if self_state == right_state:
-                    h_ij -= 1.0
+                neighbor_states.append(right_state)
 
                 # bottom neighbor
                 if j-1>=0:
                     bot_state = Z[i,j-1]
                 else:
                     bot_state = Z[i,Y-1]
-                if self_state == bot_state:
-                    h_ij -= 1.0
+                neighbor_states.append(bot_state)
 
                 # top neighbor
                 if j+1<=Y-1:
                     top_state = Z[i,j+1]
                 else:
                     top_state = Z[i,0]    
-                if self_state == top_state:
-                    h_ij -= 1.0
-             
-                h += h_ij
-                
+                neighbor_states.append(top_state)
 
-        return h/2. # Compensate for double counting
+                for state in neighbor_states:
+                    h += J(self_state,state)
+
+        h = h/2. # compensate for double counting of neighbor pairs
+                
+        # Add area constraint energies
+        for state in range(len(areas)):
+            a = areas[state]
+            A = target_areas[state]
+            h += lambda_area * theta(A) * math.pow(a-A,2.)
+
+
+        return h
     
     def StateMutator(self,cur_state):
         # Defines how a cell's state is mutated
