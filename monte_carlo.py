@@ -26,9 +26,8 @@ def MonteCarlo(conf,ofile):
         print(cur_step,T_cur,curEnergy,optEnergy)
 
         if cur_step%conf.save_every == 0 or cur_step==conf.steps:
-            np.savetxt("results/mcs_"+str(cur_step)+".csv",curState)
-        
-        accepted = False
+            np.savetxt("results/mcs_"+str(cur_step)+"_spins.csv",curState[0])
+            np.savetxt("results/mcs_"+str(cur_step)+"_types.csv",conf.SpinsToTypes(curState)) 
         
         neighborState = conf.Mutator(curState)
         neighborEnergy = conf.H(neighborState)
