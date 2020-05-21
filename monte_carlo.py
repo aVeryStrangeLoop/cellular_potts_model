@@ -45,7 +45,8 @@ def MonteCarlo(conf,ofile):
 
         cur_step += 1
 
-    np.savetxt("results/final_optimal_state.csv",optState)
+    np.savetxt("results/final_optimal_spins.csv",optState[0])
+    np.savetxt("results/final_optimal_types.csv",conf.SpinsToTypes(optState))
 
 def ToAccept(E_cur,E_new,T): # Acceptance probability
     if E_new < E_cur:

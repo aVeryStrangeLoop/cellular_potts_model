@@ -14,7 +14,7 @@ class cConfig:
     TYPES = np.array([0,1,2]) # Possible states of the system, given as a numpy array, each state type has an idx 
     ### Light = 0 , Dark = 1, Medium = 2
     # Number of cells of each type    
-    TOTAL_SPINS = 50 # Number of cells/spins
+    TOTAL_SPINS = 6 # Number of cells/spins
     SPINS = np.array(range(TOTAL_SPINS))# Each grid-cell has a spin from this set 
 
     DEBUG_MODE = False # Set to True to get a verbose output
@@ -33,7 +33,7 @@ class cConfig:
     save_every = 100 # Save system state every <save_every> steps
 
     ## Monte-Carlo temperature (if mode==0)
-    temp_constant = 10.0
+    temp_constant = 1.0
     
     ## Cooling properties (if mode ==1)
     temp_init = 1000.0 # Initial temperature (Only applicable if mode==1)
@@ -74,7 +74,7 @@ class cConfig:
 
         lambda_area = 1. # Strength of area constraint
 
-        target_areas = [4.,4.,-1] # Target area for the three cell types (light,dark,med)
+        target_areas = [40.,40.,-1] # Target area for the three cell types (light,dark,med)
 
         def theta(target_area):
             if target_area > 0:
@@ -102,15 +102,25 @@ class cConfig:
                 self_type = spin_types[self_spin]
                 spin_areas[self_spin]+=1 # add to total area of this spin
                 neighbor_spins = []
+                ## REMOVED PERIODIC BOUNDARIES
                 #left neighbor
-                neighbor_spins.append(spins[i-1,j] if i-1>=0 else spins[X-1,j])
+                #neighbor_spins.append(spins[i-1,j] if i-1>=0 else spins[X-1,j])
+                if i-1>=0:
+                    neighbor_spins.append(spins[i-1,j])
                 # right neighbor
-                neighbor_spins.append(spins[i+1,j] if i+1<=X-1 else spins[0,j])
+                #neighbor_spins.append(spins[i+1,j] if i+1<=X-1 else spins[0,j])
+                if i+1<=X-1:
+                    neighbor_spins.append(spins[i+1,j])
                 # bottom neighbor
-                neighbor_spins.append(spins[i,j-1] if j-1>=0 else spins[i,Y-1])
+                #neighbor_spins.append(spins[i,j-1] if j-1>=0 else spins[i,Y-1])
+                if j-1>=0:
+                    neighbor_spins.append(spins[i,j-1])
                 # top neighbor
-                neighbor_spins.append(spins[i,j+1] if j+1<=Y-1 else spins[i,0])
-                for i in range(4): # Four neighbors
+                #neighbor_spins.append(spins[i,j+1] if j+1<=Y-1 else spins[i,0])
+                if j+1<=Y-1:
+                    neighbor_spins.append(spins[i,j+1])
+
+                for i in range(len(neighbor_spins)): 
                     h += J(spin_types[self_spin],spin_types[neighbor_spins[i]])*(1.-delta(self_spin,neighbor_spins[i]))
 
         h = h/2. # compensate for double counting of neighbor pairs
@@ -130,32 +140,35 @@ class cConfig:
         spins = state[0]
         spin_types = state[1]
 
-        # Choose a random cell and change its spin to spin of one of its four neighbors given these two spins are not the same
-        spin_flipped = False # This variable just makes sure we don't select the same spins
-        while not spin_flipped:             
+        i1 = -1
+        i2 = -1
+        j1 = -1
+        j2 = -1
+
+        spin1 = -1
+        spin2 = -1
+        while spin1==spin2:
+            # Choose a random cell and change its spin to spin of one of its neighbors given these two spins are not the same
             i1 = random.randrange(0,spins.shape[0])
             j1 = random.randrange(0,spins.shape[1])
-   			
-            
-            randir = random.choice([[0,1],[1,0],[0,-1],[-1,0]])
+            spin1 = spins[i1,j1]
+            neighbor_chosen = False
+ 	
+            while not neighbor_chosen:           
+                randir = random.choice([[0,1],[1,0],[0,-1],[-1,0]])
 	
-            i2 = i1 + randir[0]
-            j2 = j1 + randir[1]
+                i2 = i1 + randir[0]
+                j2 = j1 + randir[1]
 
-            if i2>=spins.shape[0] or i2<0 or j2>=spins.shape[1] or j2<0: 
-                i2 = i1
-                j2 = j1
-               
-            if not (spins[i1,j1]==spins[i2,j2]):
-                spin_flipped == True
-                spin_2 = spins[i2,j2]
+                if not (i2>=spins.shape[0] or i2<0 or j2>=spins.shape[1] or j2<0): 
+                    neighbor_chosen = True
+            spin_2 = spins[i2,j2]
                     
-                mut = np.copy(spins)
-                mut[i1,j1] = spin_2
-
-                if self.DEBUG_MODE:
-                     print "Flipping spin %d to %d at (%d,%d) and (%d,%d) resp." % (state_1,state_2,i1,j1,i2,j2)
-                return np.array([mut,spin_types])
+        mut = np.copy(spins)
+        mut[i1,j1] = spin_2
+        if self.DEBUG_MODE:
+            print "Flipping spin %d to %d at (%d,%d) and (%d,%d) resp." % (state_1,state_2,i1,j1,i2,j2)
+        return np.array([mut,spin_types])
             
 
     def InitSys(self):
