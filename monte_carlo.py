@@ -10,10 +10,10 @@ def MonteCarlo(conf,ofile):
 
     InitState = conf.InitSys() # Initialize a state using function specified in config
 
-    optState = np.copy(InitState) # Stores the most optimal state ever encountered
+    optState = [np.copy(InitState[0]),np.copy(InitState[1])] # Stores the most optimal state ever encountered
     optEnergy = conf.H(optState)
  
-    curState = np.copy(InitState) # Stores the current state in the Monte-Carlo run
+    curState = [np.copy(InitState[0]),np.copy(InitState[1])] # Stores the current state in the Monte-Carlo run
     curEnergy = conf.H(curState)
 	
     cur_step = 0

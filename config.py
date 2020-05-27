@@ -14,15 +14,15 @@ class cConfig:
     TYPES = np.array([0,1,2]) # Possible states of the system, given as a numpy array, each state type has an idx 
     ### Light = 0 , Dark = 1, Medium = 2
     # Number of cells of each type    
-    TOTAL_SPINS = 6 # Number of cells/spins
+    TOTAL_SPINS = 100 # Number of cells/spins
     SPINS = np.array(range(TOTAL_SPINS))# Each grid-cell has a spin from this set 
 
     DEBUG_MODE = False # Set to True to get a verbose output
 
 
     # MAKE SURE YOU HAVE ENOUGH CELLS TO ACCOMODATE THE MAX TARGET AREA * TOTAL_SPINS limit
-    WORLD_X = 20 # Cells in X direction
-    WORLD_Y = 20 # Cells in y direction
+    WORLD_X = 100 # Cells in X direction
+    WORLD_Y = 100 # Cells in y direction
 
     MODE = 0 # Monte-carlo mode (0 = Constant temperature, 1 = cooling)
 
@@ -168,7 +168,7 @@ class cConfig:
         mut[i1,j1] = spin_2
         if self.DEBUG_MODE:
             print "Flipping spin %d to %d at (%d,%d) and (%d,%d) resp." % (state_1,state_2,i1,j1,i2,j2)
-        return np.array([mut,spin_types])
+        return [mut,spin_types]
             
 
     def InitSys(self):
@@ -181,7 +181,7 @@ class cConfig:
             print "Initialised configuration,"
             print init_types
             print init_spins
-        return np.array([init_spins,spin_types])
+        return [init_spins,spin_types]
         
 
     def SpinsToTypes(self,state):
