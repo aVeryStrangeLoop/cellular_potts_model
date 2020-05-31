@@ -45,7 +45,7 @@ class cConfig:
         spin_types = state[1]
         # Write your own code here to output the hamiltonian given a system configuration
         if self.DEBUG_MODE:
-            print "Calculating hamiltonian"
+            print("Calculating hamiltonian")
         
         # Parameters for glazier model
         def J(s1,s2):
@@ -102,23 +102,23 @@ class cConfig:
                 self_type = spin_types[self_spin]
                 spin_areas[self_spin]+=1 # add to total area of this spin
                 neighbor_spins = []
-                ## REMOVED PERIODIC BOUNDARIES
+                ## PERIODIC BOUNDARIES ENABLED, uncomment alternates to disable
                 #left neighbor
-                #neighbor_spins.append(spins[i-1,j] if i-1>=0 else spins[X-1,j])
-                if i-1>=0:
-                    neighbor_spins.append(spins[i-1,j])
+                neighbor_spins.append(spins[i-1,j] if i-1>=0 else spins[X-1,j])
+                #if i-1>=0:
+                #    neighbor_spins.append(spins[i-1,j])
                 # right neighbor
-                #neighbor_spins.append(spins[i+1,j] if i+1<=X-1 else spins[0,j])
-                if i+1<=X-1:
-                    neighbor_spins.append(spins[i+1,j])
+                neighbor_spins.append(spins[i+1,j] if i+1<=X-1 else spins[0,j])
+                #if i+1<=X-1:
+                #    neighbor_spins.append(spins[i+1,j])
                 # bottom neighbor
-                #neighbor_spins.append(spins[i,j-1] if j-1>=0 else spins[i,Y-1])
-                if j-1>=0:
-                    neighbor_spins.append(spins[i,j-1])
+                neighbor_spins.append(spins[i,j-1] if j-1>=0 else spins[i,Y-1])
+                #if j-1>=0:
+                #    neighbor_spins.append(spins[i,j-1])
                 # top neighbor
-                #neighbor_spins.append(spins[i,j+1] if j+1<=Y-1 else spins[i,0])
-                if j+1<=Y-1:
-                    neighbor_spins.append(spins[i,j+1])
+                neighbor_spins.append(spins[i,j+1] if j+1<=Y-1 else spins[i,0])
+                #if j+1<=Y-1:
+                #    neighbor_spins.append(spins[i,j+1])
 
                 for i in range(len(neighbor_spins)): 
                     h += J(spin_types[self_spin],spin_types[neighbor_spins[i]])*(1.-delta(self_spin,neighbor_spins[i]))
@@ -154,20 +154,30 @@ class cConfig:
             spin1 = spins[i1,j1]
             neighbor_chosen = False
  	
-            while not neighbor_chosen:           
-                randir = random.choice([[0,1],[1,0],[0,-1],[-1,0]])
+            #while not neighbor_chosen:           
+            randir = random.choice([[0,1],[1,0],[0,-1],[-1,0]])
 	
-                i2 = i1 + randir[0]
-                j2 = j1 + randir[1]
+            i2 = i1 + randir[0]
+            j2 = j1 + randir[1]
 
-                if not (i2>=spins.shape[0] or i2<0 or j2>=spins.shape[1] or j2<0): 
-                    neighbor_chosen = True
+                #if not (i2>=spins.shape[0] or i2<0 or j2>=spins.shape[1] or j2<0): 
+                 #   neighbor_chosen = True
+            if i2>=spins.shape[0]:
+                i2 = 0
+            elif i2<0:
+                i2 = spins.shape[0]-1
+            if j2>=spins.shape[1]:
+                j2 = 0
+            elif j2<0:
+                j2 = spins.shape[1]-1
+
+
             spin_2 = spins[i2,j2]
                     
         mut = np.copy(spins)
         mut[i1,j1] = spin_2
         if self.DEBUG_MODE:
-            print "Flipping spin %d to %d at (%d,%d) and (%d,%d) resp." % (state_1,state_2,i1,j1,i2,j2)
+            print("Flipping spin %d to %d at (%d,%d) and (%d,%d) resp." % (state_1,state_2,i1,j1,i2,j2))
         return [mut,spin_types]
             
 
@@ -178,9 +188,9 @@ class cConfig:
         spin_types = np.random.choice(self.TYPES,(self.TOTAL_SPINS)) # This array contains the type associated with each spin
         # spin_types[i] = type associated with spin no. i
         if self.DEBUG_MODE:
-            print "Initialised configuration,"
-            print init_types
-            print init_spins
+            print("Initialised configuration,")
+            print(init_types)
+            print(init_spins)
         return [init_spins,spin_types]
         
 
