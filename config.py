@@ -17,7 +17,7 @@ class cConfig:
     TOTAL_SPINS = 21 # Number of cells/spins
     SPINS = np.array(range(TOTAL_SPINS))# Each grid-cell has a spin from this set 
 
-    DEBUG_MODE = True # Set to True to get a verbose output
+    DEBUG_MODE = False # Set to True to get a verbose output
 
 
     # MAKE SURE YOU HAVE ENOUGH CELLS TO ACCOMODATE THE MAX TARGET AREA * TOTAL_SPINS limit
