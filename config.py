@@ -14,15 +14,15 @@ class cConfig:
     TYPES = np.array([0,1,2]) # Possible states of the system, given as a numpy array, each state type has an idx 
     ### Light = 0 , Dark = 1, Medium = 2
     # Number of cells of each type    
-    TOTAL_SPINS = 50 # Number of cells/spins
+    TOTAL_SPINS = 21 # Number of cells/spins
     SPINS = np.array(range(TOTAL_SPINS))# Each grid-cell has a spin from this set 
 
-    DEBUG_MODE = False # Set to True to get a verbose output
+    DEBUG_MODE = True # Set to True to get a verbose output
 
 
     # MAKE SURE YOU HAVE ENOUGH CELLS TO ACCOMODATE THE MAX TARGET AREA * TOTAL_SPINS limit
-    WORLD_X = 50 # Cells in X direction
-    WORLD_Y = 50 # Cells in y direction
+    WORLD_X = 16 # Cells in X direction
+    WORLD_Y = 16 # Cells in y direction
 
     MODE = 0 # Monte-carlo mode (0 = Constant temperature, 1 = cooling)
 
@@ -33,7 +33,7 @@ class cConfig:
     save_every = 1000 # Save system state every <save_every> steps
 
     ## Monte-Carlo temperature (if mode==0)
-    temp_constant = 2.0
+    temp_constant = 0.01
     
     ## Cooling properties (if mode ==1)
     temp_init = 1000.0 # Initial temperature (Only applicable if mode==1)
@@ -74,7 +74,7 @@ class cConfig:
 
         lambda_area = 1. # Strength of area constraint
 
-        target_areas = [9.,9.,-1] # Target area for the three cell types (light,dark,med)
+        target_areas = [5.,5.,-1] # Target area for the three cell types (light,dark,med)
 
         def theta(target_area):
             if target_area > 0:
@@ -129,7 +129,7 @@ class cConfig:
         for i in range(self.TOTAL_SPINS): # For each spin 
             a = spin_areas[i]
             A = target_areas[spin_types[i]] # Target area for the type for this spin
-            h += lambda_area * theta(A) * (a-A) * (a-A)
+            h = h + lambda_area * theta(A) * (a-A) * (a-A)
 
 
         return h
@@ -172,12 +172,12 @@ class cConfig:
                 j2 = spins.shape[1]-1
 
 
-            spin_2 = spins[i2,j2]
+            spin2 = spins[i2,j2]
                     
         mut = np.copy(spins)
-        mut[i1,j1] = spin_2
+        mut[i1,j1] = spin2
         if self.DEBUG_MODE:
-            print("Flipping spin %d to %d at (%d,%d) and (%d,%d) resp." % (state_1,state_2,i1,j1,i2,j2))
+            print("Flipping spin %d to %d at (%d,%d) and (%d,%d) resp." % (spin1,spin2,i1,j1,i2,j2))
         return [mut,spin_types]
             
 
@@ -185,12 +185,12 @@ class cConfig:
         # Sets the initial configuration of the system
         # Randomly from given types and spins. State of the system is defined by the list [types,spins]
         init_spins = np.random.choice(self.SPINS,(self.WORLD_X,self.WORLD_Y))
-        spin_types = np.random.choice(self.TYPES,(self.TOTAL_SPINS)) # This array contains the type associated with each spin
+        spin_types = np.append(np.random.choice(self.TYPES[:-1],(self.TOTAL_SPINS-1)),[2]) # This array contains the type associated with each spin
         # spin_types[i] = type associated with spin no. i
         if self.DEBUG_MODE:
             print("Initialised configuration,")
-            print(init_types)
             print(init_spins)
+            print(spin_types)
         return [init_spins,spin_types]
         
 
