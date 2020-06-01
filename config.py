@@ -72,7 +72,7 @@ class cConfig:
             elif (s1==0 and s2==2) or (s1==2 and s2==0):
                 return J02
 
-        lambda_area = 1. # Strength of area constraint
+        lambda_area = 100. # Strength of area constraint
 
         target_areas = [5.,5.,-1] # Target area for the three cell types (light,dark,med)
 
@@ -152,7 +152,7 @@ class cConfig:
             i1 = random.randrange(0,spins.shape[0])
             j1 = random.randrange(0,spins.shape[1])
             spin1 = spins[i1,j1]
-            neighbor_chosen = False
+            #neighbor_chosen = False
  	
             #while not neighbor_chosen:           
             randir = random.choice([[0,1],[1,0],[0,-1],[-1,0]])
