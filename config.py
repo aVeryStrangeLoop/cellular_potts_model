@@ -17,6 +17,10 @@ class cConfig:
     # Number of cells of each type    
     TOTAL_SPINS = 20 # Number of cells/spins
     SPINS = np.array(range(TOTAL_SPINS))# Each grid-cell has a spin from this set 
+    
+    # MAKE SURE YOU HAVE ENOUGH CELLS TO ACCOMODATE THE MAX TARGET AREA * TOTAL_SPINS limit
+    WORLD_X = 50 # Cells in X direction
+    WORLD_Y = 50 # Cells in y direction
 
     SAMPLING_TYPE = 1 #Mutation sampling
     ### 0 = neighbor sampling
@@ -24,10 +28,14 @@ class cConfig:
     
     DEBUG_MODE = False # Set to True to get a verbose output
 
+    BOUNDARY_MODE = 2 # How are boundary conditions handled
+    ### 0 = periodic
+    ### 1 = skip boundary neighbors in hamiltonian calculations
+    ### 2 = Give special energy value to boundary cells
 
-    # MAKE SURE YOU HAVE ENOUGH CELLS TO ACCOMODATE THE MAX TARGET AREA * TOTAL_SPINS limit
-    WORLD_X = 10 # Cells in X direction
-    WORLD_Y = 10 # Cells in y direction
+    BOUNDARY_ENERGIES = np.array([10.,10.,0.]) # Applicable if BOUNDARY_MODE = 2, interaction energy of boundary and type
+    # Here a small energy cost present for non medium cells to be near the boundary
+
 
     MODE = 0 # Monte-carlo mode (0 = Constant temperature, 1 = cooling)
 
@@ -39,7 +47,7 @@ class cConfig:
     save_every = 10 # Save system state every <save_every> steps
 
     ## Monte-Carlo temperature (if mode==0)
-    temp_constant = 1.0
+    temp_constant = 0.5
     
     ## Cooling properties (if mode ==1)
     temp_init = 1000.0 # Initial temperature (Only applicable if mode==1)
@@ -107,26 +115,34 @@ class cConfig:
                 self_type = spin_types[self_spin]
                 spin_areas[self_spin]+=1 # add to total area of this spin
                 neighbor_spins = []
-                ## PERIODIC BOUNDARIES DISABLED, uncomment alternates to disable
                 #left neighbor
-                #neighbor_spins.append(spins[i-1,j] if i-1>=0 else spins[X-1,j])
-                if i-1>=0:
-                    neighbor_spins.append(spins[i-1,j])
-                # right neighbor
-                #neighbor_spins.append(spins[i+1,j] if i+1<=X-1 else spins[0,j])
-                if i+1<=X-1:
-                    neighbor_spins.append(spins[i+1,j])
-                # bottom neighbor
-                #neighbor_spins.append(spins[i,j-1] if j-1>=0 else spins[i,Y-1])
-                if j-1>=0:
-                    neighbor_spins.append(spins[i,j-1])
-                # top neighbor
-                #neighbor_spins.append(spins[i,j+1] if j+1<=Y-1 else spins[i,0])
-                if j+1<=Y-1:
-                    neighbor_spins.append(spins[i,j+1])
+                if self.BOUNDARY_MODE == 0: # Periodic boundaries
+                    neighbor_spins.append(spins[i-1,j] if i-1>=0 else spins[X-1,j])
+                    neighbor_spins.append(spins[i+1,j] if i+1<=X-1 else spins[0,j])
+                    neighbor_spins.append(spins[i,j-1] if j-1>=0 else spins[i,Y-1])
+                    neighbor_spins.append(spins[i,j+1] if j+1<=Y-1 else spins[i,0])
+                elif self.BOUNDARY_MODE == 1: # Blocked boundaries
+                    if i-1>=0:
+                        neighbor_spins.append(spins[i-1,j])
+                    if i+1<=X-1:
+                        neighbor_spins.append(spins[i+1,j])
+                    if j-1>=0:
+                        neighbor_spins.append(spins[i,j-1])
+                    if j+1<=Y-1:
+                        neighbor_spins.append(spins[i,j+1])
+                elif self.BOUNDARY_MODE == 2: # Boundary interaction energies
+                    neighbor_spins.append(spins[i-1,j] if i-1>=0 else -1)
+                    neighbor_spins.append(spins[i+1,j] if i+1<=X-1 else -1)
+                    neighbor_spins.append(spins[i,j-1] if j-1>=0 else -1)
+                    neighbor_spins.append(spins[i,j+1] if j+1<=Y-1 else -1)
 
                 for idx in range(len(neighbor_spins)): 
-                    h += J(spin_types[self_spin],spin_types[neighbor_spins[idx]])*(1.-delta(self_spin,neighbor_spins[idx]))
+                    neighbor_spin = neighbor_spins[idx]
+                    if neighbor_spin != -1:
+                        h += J(spin_types[self_spin],spin_types[neighbor_spin])*(1.-delta(self_spin,neighbor_spin))
+                    else:
+                        h += 2. * self.BOUNDARY_ENERGIES[spin_types[self_spin]]  # Add boundary energy value based on spin type
+                        # NOTE: Doubled here because hamiltonian is halved later on
         
         h = h/2. # compensate for double counting of neighbor pairs
         
