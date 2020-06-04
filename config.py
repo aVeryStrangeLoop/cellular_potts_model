@@ -15,7 +15,7 @@ class cConfig:
     TYPES = np.array([0,1,2]) # Possible states of the system, given as a numpy array, each state type has an idx 
     ### Light = 0 , Dark = 1, Medium = 2
     # Number of cells of each type    
-    TOTAL_SPINS = 2 # Number of cells/spins
+    TOTAL_SPINS = 20 # Number of cells/spins
     SPINS = np.array(range(TOTAL_SPINS))# Each grid-cell has a spin from this set 
 
     SAMPLING_TYPE = 1 #Mutation sampling
@@ -26,8 +26,8 @@ class cConfig:
 
 
     # MAKE SURE YOU HAVE ENOUGH CELLS TO ACCOMODATE THE MAX TARGET AREA * TOTAL_SPINS limit
-    WORLD_X = 4 # Cells in X direction
-    WORLD_Y = 4 # Cells in y direction
+    WORLD_X = 10 # Cells in X direction
+    WORLD_Y = 10 # Cells in y direction
 
     MODE = 0 # Monte-carlo mode (0 = Constant temperature, 1 = cooling)
 
@@ -36,10 +36,10 @@ class cConfig:
 
     steps = MAX_MCS*16.*TOTAL_SPINS # Total number of steps for monte_carlo(mode=0)/simulated annealing(mode=1)
 
-    save_every = 1 # Save system state every <save_every> steps
+    save_every = 10 # Save system state every <save_every> steps
 
     ## Monte-Carlo temperature (if mode==0)
-    temp_constant = 2.0
+    temp_constant = 1.0
     
     ## Cooling properties (if mode ==1)
     temp_init = 1000.0 # Initial temperature (Only applicable if mode==1)
@@ -62,8 +62,8 @@ class cConfig:
 
             J01 = 11. # Surface energy between 0-1 (light-dark)
         
-            J12 = 2. # Surface energy between 1-2 (dark-medium)
-            J02 = 2. # Surface energy between 0-2 (light-medium)
+            J12 = 16. # Surface energy between 1-2 (dark-medium)
+            J02 = 16. # Surface energy between 0-2 (light-medium)
             
             if (s1==0 and s2==0):
                 return J00
@@ -78,9 +78,9 @@ class cConfig:
             elif (s1==0 and s2==2) or (s1==2 and s2==0):
                 return J02
 
-        lambda_area = 10. # Strength of area constraint
+        lambda_area = 1. # Strength of area constraint
 
-        target_areas = [4.,4.,-1] # Target area for the three cell types (light,dark,med)
+        target_areas = [5.,5.,-1] # Target area for the three cell types (light,dark,med)
 
         def theta(target_area):
             if target_area > 0:
@@ -104,31 +104,29 @@ class cConfig:
         for i in range(X):
             for j in range(Y):
                 self_spin = spins[i,j]
-                print(self_spin)
                 self_type = spin_types[self_spin]
                 spin_areas[self_spin]+=1 # add to total area of this spin
                 neighbor_spins = []
-                ## PERIODIC BOUNDARIES ENABLED, uncomment alternates to disable
+                ## PERIODIC BOUNDARIES DISABLED, uncomment alternates to disable
                 #left neighbor
-                neighbor_spins.append(spins[i-1,j] if i-1>=0 else spins[X-1,j])
-                #if i-1>=0:
-                #    neighbor_spins.append(spins[i-1,j])
+                #neighbor_spins.append(spins[i-1,j] if i-1>=0 else spins[X-1,j])
+                if i-1>=0:
+                    neighbor_spins.append(spins[i-1,j])
                 # right neighbor
-                neighbor_spins.append(spins[i+1,j] if i+1<=X-1 else spins[0,j])
-                #if i+1<=X-1:
-                #    neighbor_spins.append(spins[i+1,j])
+                #neighbor_spins.append(spins[i+1,j] if i+1<=X-1 else spins[0,j])
+                if i+1<=X-1:
+                    neighbor_spins.append(spins[i+1,j])
                 # bottom neighbor
-                neighbor_spins.append(spins[i,j-1] if j-1>=0 else spins[i,Y-1])
-                #if j-1>=0:
-                #    neighbor_spins.append(spins[i,j-1])
+                #neighbor_spins.append(spins[i,j-1] if j-1>=0 else spins[i,Y-1])
+                if j-1>=0:
+                    neighbor_spins.append(spins[i,j-1])
                 # top neighbor
-                neighbor_spins.append(spins[i,j+1] if j+1<=Y-1 else spins[i,0])
-                #if j+1<=Y-1:
-                #    neighbor_spins.append(spins[i,j+1])
+                #neighbor_spins.append(spins[i,j+1] if j+1<=Y-1 else spins[i,0])
+                if j+1<=Y-1:
+                    neighbor_spins.append(spins[i,j+1])
 
                 for idx in range(len(neighbor_spins)): 
                     h += J(spin_types[self_spin],spin_types[neighbor_spins[idx]])*(1.-delta(self_spin,neighbor_spins[idx]))
-        print(spin_areas)
         
         h = h/2. # compensate for double counting of neighbor pairs
         
@@ -211,7 +209,7 @@ class cConfig:
         # Sets the initial configuration of the system
         # Randomly from given types and spins. State of the system is defined by the list [types,spins]
         init_spins = np.random.choice(self.SPINS,(self.WORLD_X,self.WORLD_Y))
-        spin_types = np.append(np.random.choice(self.TYPES[:-1],(self.TOTAL_SPINS-1)),[2]) # This array contains the type associated with each spin
+        spin_types = np.random.choice(self.TYPES,(self.TOTAL_SPINS)) # This array contains the type associated with each spin
         # spin_types[i] = type associated with spin no. i
         if self.DEBUG_MODE:
             print("Initialised configuration,")
