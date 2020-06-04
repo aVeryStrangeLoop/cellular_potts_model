@@ -44,7 +44,7 @@ class cConfig:
 
     steps = MAX_MCS*16.*TOTAL_SPINS # Total number of steps for monte_carlo(mode=0)/simulated annealing(mode=1)
 
-    save_every = 10 # Save system state every <save_every> steps
+    save_every = 1000 # Save system state every <save_every> steps
 
     ## Monte-Carlo temperature (if mode==0)
     temp_constant = 0.5
