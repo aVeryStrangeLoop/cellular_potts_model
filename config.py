@@ -6,6 +6,7 @@ import copy
 import numpy as np
 import random
 import math
+import sys
 
 class cConfig:
     ### Configuration class contains all user-define parameters required during runtime  
@@ -14,7 +15,7 @@ class cConfig:
     TYPES = np.array([0,1,2]) # Possible states of the system, given as a numpy array, each state type has an idx 
     ### Light = 0 , Dark = 1, Medium = 2
     # Number of cells of each type    
-    TOTAL_SPINS = 3 # Number of cells/spins
+    TOTAL_SPINS = 2 # Number of cells/spins
     SPINS = np.array(range(TOTAL_SPINS))# Each grid-cell has a spin from this set 
 
     SAMPLING_TYPE = 1 #Mutation sampling
@@ -38,7 +39,7 @@ class cConfig:
     save_every = 1 # Save system state every <save_every> steps
 
     ## Monte-Carlo temperature (if mode==0)
-    temp_constant = 1.0
+    temp_constant = 2.0
     
     ## Cooling properties (if mode ==1)
     temp_init = 1000.0 # Initial temperature (Only applicable if mode==1)
@@ -61,8 +62,8 @@ class cConfig:
 
             J01 = 11. # Surface energy between 0-1 (light-dark)
         
-            J12 = 16. # Surface energy between 1-2 (dark-medium)
-            J02 = 16. # Surface energy between 0-2 (light-medium)
+            J12 = 2. # Surface energy between 1-2 (dark-medium)
+            J02 = 2. # Surface energy between 0-2 (light-medium)
             
             if (s1==0 and s2==0):
                 return J00
@@ -77,9 +78,9 @@ class cConfig:
             elif (s1==0 and s2==2) or (s1==2 and s2==0):
                 return J02
 
-        lambda_area = 100. # Strength of area constraint
+        lambda_area = 10. # Strength of area constraint
 
-        target_areas = [5.,5.,-1] # Target area for the three cell types (light,dark,med)
+        target_areas = [4.,4.,-1] # Target area for the three cell types (light,dark,med)
 
         def theta(target_area):
             if target_area > 0:
@@ -97,13 +98,13 @@ class cConfig:
 
         X = spins.shape[0]
         Y = spins.shape[1]
-
         spin_areas = np.zeros(self.TOTAL_SPINS) # Areas of all cells
-
+        
         # Add interaction energies (and count area of each state)
         for i in range(X):
             for j in range(Y):
                 self_spin = spins[i,j]
+                print(self_spin)
                 self_type = spin_types[self_spin]
                 spin_areas[self_spin]+=1 # add to total area of this spin
                 neighbor_spins = []
@@ -125,17 +126,17 @@ class cConfig:
                 #if j+1<=Y-1:
                 #    neighbor_spins.append(spins[i,j+1])
 
-                for i in range(len(neighbor_spins)): 
-                    h += J(spin_types[self_spin],spin_types[neighbor_spins[i]])*(1.-delta(self_spin,neighbor_spins[i]))
-
+                for idx in range(len(neighbor_spins)): 
+                    h += J(spin_types[self_spin],spin_types[neighbor_spins[idx]])*(1.-delta(self_spin,neighbor_spins[idx]))
+        print(spin_areas)
+        
         h = h/2. # compensate for double counting of neighbor pairs
-                
+        
         # Add area constraint energies
-        for i in range(self.TOTAL_SPINS): # For each spin 
-            a = spin_areas[i]
-            A = target_areas[spin_types[i]] # Target area for the type for this spin
-            h = h + lambda_area * theta(A) * (a-A) * (a-A)
-
+        for idx in range(self.TOTAL_SPINS): # For each spin 
+            a = spin_areas[idx]
+            A = target_areas[spin_types[idx]] # Target area for the type for this spin
+            h = h + lambda_area * theta(A) * math.pow((a-A),2)
 
         return h
      
@@ -210,8 +211,7 @@ class cConfig:
         # Sets the initial configuration of the system
         # Randomly from given types and spins. State of the system is defined by the list [types,spins]
         init_spins = np.random.choice(self.SPINS,(self.WORLD_X,self.WORLD_Y))
-        #spin_types = np.append(np.random.choice(self.TYPES[:-1],(self.TOTAL_SPINS-1)),[2]) # This array contains the type associated with each spin
-        spin_types = np.array([0,1,2])
+        spin_types = np.append(np.random.choice(self.TYPES[:-1],(self.TOTAL_SPINS-1)),[2]) # This array contains the type associated with each spin
         # spin_types[i] = type associated with spin no. i
         if self.DEBUG_MODE:
             print("Initialised configuration,")
@@ -228,3 +228,19 @@ class cConfig:
             for j in range(spins.shape[1]):
                 types[i,j] = spin_types[spins[i,j]]
         return types
+
+
+if __name__=="__main__":
+    print("Running in hamiltonian check mode, to use for actual runs run main.py instead!")
+    
+    conf = cConfig()
+
+    spinsfile = sys.argv[1]
+    typesfile = sys.argv[2]
+    
+    spins = np.loadtxt(spinsfile)
+    types = np.loadtxt(typesfile)
+    spins = spins.astype('int')
+    types = types.astype('int')
+
+    print("Hamiltonian of given configuration: %f" % (conf.H([spins,types])))

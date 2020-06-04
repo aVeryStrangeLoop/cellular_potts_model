@@ -39,5 +39,5 @@ for i in range(spins.shape[0]):
 lc = mc.LineCollection(lines,color="red",linewidths=2)            
 fig, ax = plt.subplots()
 ax.add_collection(lc)
-ax.imshow(types)
+ax.imshow(types,vmin=0,vmax=2)
 plt.savefig('spins_out.png')
