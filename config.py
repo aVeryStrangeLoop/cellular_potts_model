@@ -35,10 +35,10 @@ class cConfig:
 
     steps = MAX_MCS*16.*TOTAL_SPINS # Total number of steps for monte_carlo(mode=0)/simulated annealing(mode=1)
 
-    save_every = 1000 # Save system state every <save_every> steps
+    save_every = 1 # Save system state every <save_every> steps
 
     ## Monte-Carlo temperature (if mode==0)
-    temp_constant = 0.01
+    temp_constant = 1.0
     
     ## Cooling properties (if mode ==1)
     temp_init = 1000.0 # Initial temperature (Only applicable if mode==1)
@@ -210,7 +210,8 @@ class cConfig:
         # Sets the initial configuration of the system
         # Randomly from given types and spins. State of the system is defined by the list [types,spins]
         init_spins = np.random.choice(self.SPINS,(self.WORLD_X,self.WORLD_Y))
-        spin_types = np.append(np.random.choice(self.TYPES[:-1],(self.TOTAL_SPINS-1)),[2]) # This array contains the type associated with each spin
+        #spin_types = np.append(np.random.choice(self.TYPES[:-1],(self.TOTAL_SPINS-1)),[2]) # This array contains the type associated with each spin
+        spin_types = np.array([0,1,2])
         # spin_types[i] = type associated with spin no. i
         if self.DEBUG_MODE:
             print("Initialised configuration,")
