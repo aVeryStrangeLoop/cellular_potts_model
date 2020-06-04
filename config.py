@@ -14,17 +14,22 @@ class cConfig:
     TYPES = np.array([0,1,2]) # Possible states of the system, given as a numpy array, each state type has an idx 
     ### Light = 0 , Dark = 1, Medium = 2
     # Number of cells of each type    
-    TOTAL_SPINS = 21 # Number of cells/spins
+    TOTAL_SPINS = 3 # Number of cells/spins
     SPINS = np.array(range(TOTAL_SPINS))# Each grid-cell has a spin from this set 
 
+    SAMPLING_TYPE = 1 #Mutation sampling
+    ### 0 = neighbor sampling
+    ### 1 = global sampling, flip mutant to any spins in the world
+    
     DEBUG_MODE = False # Set to True to get a verbose output
 
 
     # MAKE SURE YOU HAVE ENOUGH CELLS TO ACCOMODATE THE MAX TARGET AREA * TOTAL_SPINS limit
-    WORLD_X = 16 # Cells in X direction
-    WORLD_Y = 16 # Cells in y direction
+    WORLD_X = 4 # Cells in X direction
+    WORLD_Y = 4 # Cells in y direction
 
     MODE = 0 # Monte-carlo mode (0 = Constant temperature, 1 = cooling)
+
 
     MAX_MCS = 1000
 
@@ -139,46 +144,66 @@ class cConfig:
         ## If conserved status is false, mutate only one cell
         spins = state[0]
         spin_types = state[1]
+        
+        if self.SAMPLING_TYPE == 0:
+            if np.max(spins)==np.min(spins):
+                print("All spins same in world, Neighbor sampling not possible!")
+                exit(0)
 
-        i1 = -1
-        i2 = -1
-        j1 = -1
-        j2 = -1
+            i1 = -1
+            i2 = -1
+            j1 = -1
+            j2 = -1
 
-        spin1 = -1
-        spin2 = -1
-        while spin1==spin2:
-            # Choose a random cell and change its spin to spin of one of its neighbors given these two spins are not the same
+            spin1 = -1
+            spin2 = -1
+            while spin1==spin2:
+                # Choose a random cell and change its spin to spin of one of its neighbors given these two spins are not the same
+                i1 = random.randrange(0,spins.shape[0])
+                j1 = random.randrange(0,spins.shape[1])
+                spin1 = spins[i1,j1]
+                #neighbor_chosen = False
+            
+                #while not neighbor_chosen:           
+                randir = random.choice([[0,1],[1,0],[0,-1],[-1,0]])
+            
+                i2 = i1 + randir[0]
+                j2 = j1 + randir[1]
+
+                    #if not (i2>=spins.shape[0] or i2<0 or j2>=spins.shape[1] or j2<0): 
+                     #   neighbor_chosen = True
+                if i2>=spins.shape[0]:
+                    i2 = 0
+                elif i2<0:
+                    i2 = spins.shape[0]-1
+                if j2>=spins.shape[1]:
+                    j2 = 0
+                elif j2<0:
+                    j2 = spins.shape[1]-1
+
+
+                spin2 = spins[i2,j2]
+                        
+            mut = np.copy(spins)
+            mut[i1,j1] = spin2
+            if self.DEBUG_MODE:
+                print("Flipping spin %d to %d at (%d,%d) and (%d,%d) resp." % (spin1,spin2,i1,j1,i2,j2))
+            return [mut,spin_types]
+        
+        elif self.SAMPLING_TYPE==1:
             i1 = random.randrange(0,spins.shape[0])
             j1 = random.randrange(0,spins.shape[1])
             spin1 = spins[i1,j1]
-            #neighbor_chosen = False
- 	
-            #while not neighbor_chosen:           
-            randir = random.choice([[0,1],[1,0],[0,-1],[-1,0]])
-	
-            i2 = i1 + randir[0]
-            j2 = j1 + randir[1]
-
-                #if not (i2>=spins.shape[0] or i2<0 or j2>=spins.shape[1] or j2<0): 
-                 #   neighbor_chosen = True
-            if i2>=spins.shape[0]:
-                i2 = 0
-            elif i2<0:
-                i2 = spins.shape[0]-1
-            if j2>=spins.shape[1]:
-                j2 = 0
-            elif j2<0:
-                j2 = spins.shape[1]-1
-
-
-            spin2 = spins[i2,j2]
-                    
-        mut = np.copy(spins)
-        mut[i1,j1] = spin2
-        if self.DEBUG_MODE:
-            print("Flipping spin %d to %d at (%d,%d) and (%d,%d) resp." % (spin1,spin2,i1,j1,i2,j2))
-        return [mut,spin_types]
+            spin2 = spin1
+            while spin1 == spin2:
+                spin2 = random.choice(self.SPINS)
+            
+            mut = np.copy(spins)
+            mut[i1,j1] = spin2
+            if self.DEBUG_MODE:
+                print("Flipping spin %d to %d at (%d,%d) and (%d,%d) resp." % (spin1,spin2,i1,j1,i2,j2))
+            return [mut,spin_types]
+            
             
 
     def InitSys(self):
