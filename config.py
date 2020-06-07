@@ -15,14 +15,14 @@ class cConfig:
     TYPES = np.array([0,1,2]) # Possible states of the system, given as a numpy array, each state type has an idx 
     ### Light = 0 , Dark = 1, Medium = 2
     # Number of cells of each type    
-    TOTAL_SPINS = 101 # Number of cells/spins
+    TOTAL_SPINS = 150 # Number of cells/spins
     SPINS = np.array(range(TOTAL_SPINS))# Each grid-cell has a spin from this set 
     
     # MAKE SURE YOU HAVE ENOUGH CELLS TO ACCOMODATE THE MAX TARGET AREA * TOTAL_SPINS limit
     WORLD_X = 50 # Cells in X direction
     WORLD_Y = 50 # Cells in y direction
 
-    SAMPLING_TYPE = 0 #Mutation sampling
+    SAMPLING_TYPE = 1 #Mutation sampling
     ### 0 = neighbor sampling
     ### 1 = global sampling, flip mutant to any spins in the world
     
@@ -88,7 +88,7 @@ class cConfig:
 
         lambda_area = 1. # Strength of area constraint
 
-        target_areas = [20.,20.,-1] # Target area for the three cell types (light,dark,med)
+        target_areas = [8.,8.,-1] # Target area for the three cell types (light,dark,med)
 
         def theta(target_area):
             if target_area > 0:
@@ -216,7 +216,7 @@ class cConfig:
             mut = np.copy(spins)
             mut[i1,j1] = spin2
             if self.DEBUG_MODE:
-                print("Flipping spin %d to %d at (%d,%d) and (%d,%d) resp." % (spin1,spin2,i1,j1,i2,j2))
+                print("Flipping spin %d at (%d,%d) to %d" % (spin1,i1,j1,spin2))
             return [mut,spin_types]
             
             
