@@ -19,8 +19,8 @@ class cConfig:
     SPINS = np.array(range(TOTAL_SPINS))# Each grid-cell has a spin from this set 
     
     # MAKE SURE YOU HAVE ENOUGH CELLS TO ACCOMODATE THE MAX TARGET AREA * TOTAL_SPINS limit
-    WORLD_X = 50 # Cells in X direction
-    WORLD_Y = 50 # Cells in y direction
+    WORLD_X = 100 # Cells in X direction
+    WORLD_Y = 100 # Cells in y direction
 
     SAMPLING_TYPE = 1 #Mutation sampling
     ### 0 = neighbor sampling
@@ -47,7 +47,7 @@ class cConfig:
     save_every = 1000 # Save system state every <save_every> steps
 
     ## Monte-Carlo temperature (if mode==0)
-    temp_constant = 0.5
+    temp_constant = 0.1
     
     ## Cooling properties (if mode ==1)
     temp_init = 1000.0 # Initial temperature (Only applicable if mode==1)
@@ -88,7 +88,7 @@ class cConfig:
 
         lambda_area = 1. # Strength of area constraint
 
-        target_areas = [8.,8.,-1] # Target area for the three cell types (light,dark,med)
+        target_areas = [40.,40.,-1] # Target area for the three cell types (light,dark,med)
 
         def theta(target_area):
             if target_area > 0:
