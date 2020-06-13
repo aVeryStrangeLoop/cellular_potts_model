@@ -1,7 +1,7 @@
 import numpy as np
 import sys
-import matplotlib
-matplotlib.use('Agg')
+#import matplotlib
+#matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
 if len(sys.argv)<2:
@@ -14,4 +14,4 @@ filename = sys.argv[1]
 img = np.loadtxt(filename)
 
 plt.imshow(img)
-plt.savefig('img.png') 
+plt.savefig('test.png') 

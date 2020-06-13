@@ -1,7 +1,7 @@
 # Draws the spins and types in a single graph
 import sys
-import matplotlib
-matplotlib.use('Agg')
+#import matplotlib
+#matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib import collections as mc
@@ -41,3 +41,4 @@ fig, ax = plt.subplots()
 ax.add_collection(lc)
 ax.imshow(types,vmin=0,vmax=2)
 plt.savefig('spins_out.png')
+plt.show()

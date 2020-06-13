@@ -15,20 +15,20 @@ class cConfig:
     TYPES = np.array([0,1,2]) # Possible states of the system, given as a numpy array, each state type has an idx 
     ### Light = 0 , Dark = 1, Medium = 2
     # Number of cells of each type    
-    TOTAL_SPINS = 150 # Number of cells/spins
+    TOTAL_SPINS = 401 # Number of cells/spins
     SPINS = np.array(range(TOTAL_SPINS))# Each grid-cell has a spin from this set 
     
     # MAKE SURE YOU HAVE ENOUGH CELLS TO ACCOMODATE THE MAX TARGET AREA * TOTAL_SPINS limit
     WORLD_X = 100 # Cells in X direction
     WORLD_Y = 100 # Cells in y direction
 
-    SAMPLING_TYPE = 1 #Mutation sampling
+    SAMPLING_TYPE = 0 #Mutation sampling
     ### 0 = neighbor sampling
     ### 1 = global sampling, flip mutant to any spins in the world
     
     DEBUG_MODE = False # Set to True to get a verbose output
 
-    BOUNDARY_MODE = 2 # How are boundary conditions handled
+    BOUNDARY_MODE = 0 # How are boundary conditions handled
     ### 0 = periodic
     ### 1 = skip boundary neighbors in hamiltonian calculations
     ### 2 = Give special energy value to boundary cells
@@ -39,15 +39,12 @@ class cConfig:
 
     MODE = 0 # Monte-carlo mode (0 = Constant temperature, 1 = cooling)
 
-
-    MAX_MCS = 1000
-
-    steps = MAX_MCS*16.*TOTAL_SPINS # Total number of steps for monte_carlo(mode=0)/simulated annealing(mode=1)
+    steps = 2500000 # Total number of steps for monte_carlo(mode=0)/simulated annealing(mode=1)
 
     save_every = 1000 # Save system state every <save_every> steps
 
     ## Monte-Carlo temperature (if mode==0)
-    temp_constant = 0.1
+    temp_constant = 1.
     
     ## Cooling properties (if mode ==1)
     temp_init = 1000.0 # Initial temperature (Only applicable if mode==1)
@@ -88,7 +85,7 @@ class cConfig:
 
         lambda_area = 1. # Strength of area constraint
 
-        target_areas = [40.,40.,-1] # Target area for the three cell types (light,dark,med)
+        target_areas = [5.,5.,-1] # Target area for the three cell types (light,dark,med)
 
         def theta(target_area):
             if target_area > 0:
