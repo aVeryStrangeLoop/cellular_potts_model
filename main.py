@@ -1,5 +1,6 @@
-# Main file to run the multistate-ising optimization routine
-# Written by Bhaskar Kumawat for PH354 as a part of the multistate-ising package
+# Main file to run the Cellular potts model
+# Written by Bhaskar Kumawat for PH354
+# Dependencies: numpy 
 
 from config import cConfig
 from simulated_annealing import SimulatedAnneal

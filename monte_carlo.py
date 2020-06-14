@@ -1,4 +1,6 @@
-# Constant temperature monte carlo subroutine for multistate-ising solver
+# Constant temperature monte carlo subroutine 
+# Written by Bhaskar Kumawat as a part of the Cellular Potts Package
+# Dependencies : numpy
 import numpy as np
 import random
 import math

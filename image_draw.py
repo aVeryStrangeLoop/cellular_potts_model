@@ -1,3 +1,7 @@
+# Draw an image of a csv numpy array
+# Written for the Cellular Potts Package by Bhaskar Kumawat (@aVeryStrangeLoop_
+# Dependencies : numpy, matplotlib
+
 import numpy as np
 import sys
 #import matplotlib

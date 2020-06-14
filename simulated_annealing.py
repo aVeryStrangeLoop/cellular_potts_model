@@ -1,4 +1,6 @@
-# Simulated Annealing subroutine for multistate-ising solver
+# Simulated Annealing subroutine
+# Written by Bhaskar Kumawat as a part of the Cellular potts model package
+# Dependencies : numpy
 import numpy as np
 import random
 import math

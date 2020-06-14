@@ -1,4 +1,4 @@
-# Part of the multistate-ising solver package written by Bhaskar Kumawat (@aVeryStrangeLoop)
+# Part of the Cellular potts model package written by Bhaskar Kumawat (@aVeryStrangeLoop)
 # Filename : config.py
 # Contains : configuration for running the solver
 # Dependencies : numpy
@@ -15,12 +15,12 @@ class cConfig:
     TYPES = np.array([0,1,2]) # Possible states of the system, given as a numpy array, each state type has an idx 
     ### Light = 0 , Dark = 1, Medium = 2
     # Number of cells of each type    
-    TOTAL_SPINS = 401 # Number of cells/spins
+    TOTAL_SPINS = 201 # Number of cells/spins
     SPINS = np.array(range(TOTAL_SPINS))# Each grid-cell has a spin from this set 
     
     # MAKE SURE YOU HAVE ENOUGH CELLS TO ACCOMODATE THE MAX TARGET AREA * TOTAL_SPINS limit
-    WORLD_X = 100 # Cells in X direction
-    WORLD_Y = 100 # Cells in y direction
+    WORLD_X = 50 # Cells in X direction
+    WORLD_Y = 50 # Cells in y direction
 
     SAMPLING_TYPE = 0 #Mutation sampling
     ### 0 = neighbor sampling
@@ -44,7 +44,7 @@ class cConfig:
     save_every = 1000 # Save system state every <save_every> steps
 
     ## Monte-Carlo temperature (if mode==0)
-    temp_constant = 1.
+    temp_constant = 0.1
     
     ## Cooling properties (if mode ==1)
     temp_init = 1000.0 # Initial temperature (Only applicable if mode==1)
@@ -83,9 +83,9 @@ class cConfig:
             elif (s1==0 and s2==2) or (s1==2 and s2==0):
                 return J02
 
-        lambda_area = 1. # Strength of area constraint
+        lambda_area = 10. # Strength of area constraint
 
-        target_areas = [5.,5.,-1] # Target area for the three cell types (light,dark,med)
+        target_areas = [10.,10.,-1] # Target area for the three cell types (light,dark,med)
 
         def theta(target_area):
             if target_area > 0:
@@ -137,7 +137,7 @@ class cConfig:
                     neighbor_spin = neighbor_spins[idx]
                     if neighbor_spin != -1:
                         h += J(spin_types[self_spin],spin_types[neighbor_spin])*(1.-delta(self_spin,neighbor_spin))
-                    else:
+                    elif neighbor_spin == -1:
                         h += 2. * self.BOUNDARY_ENERGIES[spin_types[self_spin]]  # Add boundary energy value based on spin type
                         # NOTE: Doubled here because hamiltonian is halved later on
         

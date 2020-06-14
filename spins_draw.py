@@ -1,4 +1,7 @@
 # Draws the spins and types in a single graph
+# Written by Bhaskar Kumawat as a utility script for the Cellular Potts Package
+# Dependencies : numpy and matplotlib
+
 import sys
 #import matplotlib
 #matplotlib.use('Agg')

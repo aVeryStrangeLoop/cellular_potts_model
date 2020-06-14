@@ -1,4 +1,6 @@
 # Draw a graph of system energy over MCS
+# Part of the Cellular Potts model package written by Bhaskar Kumawat (@aVeryStrangeLoop)
+# Dependencies : matplotlib
 import sys
 import matplotlib.pyplot as plt
 

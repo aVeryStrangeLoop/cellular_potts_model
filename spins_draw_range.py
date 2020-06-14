@@ -1,4 +1,8 @@
-# Draws the spins and types in a single graph
+# Draws the spins and types in a single graph, can take a range and output range of images
+# Written by Bhaskar Kumawat as a part of the Cellular Potts Package
+# Dependencies : numpy and matplotlib
+
+
 import sys
 import matplotlib
 matplotlib.use('Agg')
